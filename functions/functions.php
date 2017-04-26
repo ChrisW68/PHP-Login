@@ -466,3 +466,70 @@ function logged_in(){
 
 }	// functions
 
+/** Recover Password **/
+function recover_password() {
+
+	if($_SERVER['REQUEST_METHOD'] == "POST") {
+
+		if(isset($_SESSION['token']) && $_POST['token'] === $_SESSION['token']) {
+
+				$email = clean($_POST['email']);
+
+				if(email_exists($email)) {
+
+					$validation_code = md5($email + microtime());
+
+					setcookie('temp_access_code', $validation_code, time()+ 60);
+
+					$subject = "Please reset your password";
+					$message = "Here is your password reset code {$validation_code}
+
+					Click here to reset your password http://localhost/code.php?email=$email&code=$validation_code
+
+					";
+
+					$header = "From: noreply@yourwebsite.com";
+
+					if(!send_email($email, $subject, $message, $header)) {
+						echo validation_errors("This email could not be sent");
+					}
+
+					set_message("<p class='bg-success text-center'>Please check email or spam folder for password reset email</p>");
+					redirect("index.php");
+
+				} else {
+					echo validation_errors("This email does not exist");
+				}
+
+		}else {
+			redirect("index.php");
+		}//Token Check
+	} //post request
+
+} //functions
+
+/***** Code Validation *****/
+
+function validate_code () {
+
+	if(isset($_COOKIE['temp_access_code'])) {
+
+		if($_SERVER['REQUEST_METHOD'] == "GET") {
+			if(isset($_GET['email']) && isset($_GET['code'])) {
+				
+			}
+		}
+
+	} else {
+		set_message("<p class='bg-danger text-center'>Sorry your validation cookie was expired</p>");
+
+		redirect("recover.php");
+
+	}
+
+}
+
+
+
+
+?>
